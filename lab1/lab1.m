@@ -19,10 +19,11 @@ Ts = 1;
 Gd = c2d(Gp,Ts,'zoh');
 n=2;
 
-t = [7 10 25 30 45 1000 2000 5000];
+t = [7 10 25 30 45 1000 2000 5000 10000];
 % t = [10];
 %% System Identification Algorithm without noise
-
+theta = zeros(5, length(t));
+x = 1;
 for H = t
     
     u = rand(H,1);
@@ -31,14 +32,16 @@ for H = t
     A = zeros(H-2,2*n+1); 
     
     for i = 2: H-1
-        A(i-1,:) = [-y(i) -y(i-1) u(i+1) u(i) u(i-1)];
+        A(i-1,:) = [ y(i) y(i-1) u(i+1) u(i) u(i-1)];
     end
     A;
-    theta = pinv(A)*y(3:H);
+    theta(:,x) = pinv(A)*y(3:H);
+    x = x+1;
 end
 
 %% System Identification Algorithm with noise
-
+theta1 = zeros(5,  length(t));
+x = 1;
 for H = t
     e = randn(H,1);
     [num, den] = tfdata(Gd, 'v');
@@ -54,11 +57,13 @@ for H = t
         A(i-1,:) = [-y(i) -y(i-1) u(i+1) u(i) u(i-1)];
     end
     A;
-    theta1 = pinv(A)*y(3:H);
+    theta1(:,x) = pinv(A)*y(3:H);
+    x=x+1;
 end
 
 %% System Identification Algorithm with output noise
-
+theta2 = zeros(5, length(t));
+x = 1;
 for H = t
     u = rand(H,1);
     nu = randn(H,1);
@@ -67,11 +72,18 @@ for H = t
     A = zeros(H-2,2*n+1); 
     
     for i = 2: H-1
-        A(i-1,:) = [-y(i) -y(i-1) u(i+1) u(i) u(i-1)];
+        A(i-1,:) = [y(i) y(i-1) u(i+1) u(i) u(i-1)];
     end
     A;
-    theta = pinv(A)*y(3:H);
+
+    theta2(:,x) = pinv(A)*y(3:H);
+    x = x+1;
 end
+
+theta
+theta1
+theta2
+
 
 
 
